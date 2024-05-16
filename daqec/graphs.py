@@ -1,9 +1,15 @@
 """
 Universal graph operation utilities, especially for "rustworkx" backend
 """
+import cirq
 import networkx as nx
 import rustworkx as rx
-from typing import Callable, List, Any
+import pydot
+import matplotlib.pyplot as plt
+from networkx.drawing.nx_pydot import graphviz_layout
+from typing import Callable, List, Any, Union
+from IPython.display import Image
+from .circuits import repr_circuit
 
 
 def rx_to_nx_graph(graph):
@@ -25,6 +31,54 @@ def rx_to_nx_graph(graph):
 def nx_to_rx_graph(graph):
     """Convert a networkx graph to a rustworkx PyGraph."""
     return rx.networkx_converter(graph)
+
+
+def draw_circ_dag_mpl(dag: Union[nx.DiGraph, rx.PyDiGraph], fname=None, figsize=None, fix_layout=False):
+    if isinstance(dag, rx.PyDiGraph):
+        dag = rx_to_nx_graph(dag)
+
+    colors = {1: 'white', 2: 'lightblue', 3: 'lightgreen', 4: 'lightpink',
+              5: 'lightyellow', 6: 'lightgray', 7: 'lightcyan', 8: 'lightcoral'}
+    node_colors = [colors[len(g.qubits)] if isinstance(g, cirq.GateOperation) else colors[len(g.all_qubits())] for g in
+                   dag.nodes]
+    if fix_layout:
+        pos = graphviz_layout(dag, prog='dot')
+    else:
+        pos = None
+
+    if figsize:
+        plt.figure(figsize=figsize)
+
+    nx.draw(dag, pos, with_labels=True,
+            labels={node: (str(node) if isinstance(node, cirq.GateOperation) else repr_circuit(node)) for node in
+                    dag.nodes}, node_color=node_colors,
+            edgecolors='k',
+            node_size=450, font_size=8, font_weight='bold')
+    if fname:
+        plt.savefig(fname)
+
+
+def draw_circ_dag_graphviz(dag: Union[nx.DiGraph, rx.PyDiGraph], fname: str = None) -> Image:
+    if isinstance(dag, rx.PyDiGraph):
+        dag = rx_to_nx_graph(dag)
+
+    dot = pydot.Dot(graph_type='digraph')
+    gate_to_node = {}
+    colors = {1: 'white', 2: 'lightblue', 3: 'lightgreen', 4: 'lightpink',
+              5: 'lightyellow', 6: 'lightgray', 7: 'lightcyan', 8: 'lightcoral'}
+    for g in dag.nodes:
+        node = pydot.Node(hash(g), label=str(g),
+                          fillcolor=colors[len(g.qubits)] if isinstance(g, cirq.GateOperation) else colors[
+                              len(g.all_qubits())],
+                          style='filled')
+        gate_to_node[g] = node
+        dot.add_node(node)
+    for edge in dag.edges:
+        dot.add_edge(pydot.Edge(gate_to_node[edge[0]], gate_to_node[edge[1]]))
+    dot.set_rankdir('LR')
+    if fname:
+        dot.write_png(fname)
+    return Image(dot.create_png())
 
 
 def find_successors_by_node(dag: rx.PyDiGraph, idx: int, predicate: Callable) -> List[Any]:
