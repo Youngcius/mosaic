@@ -12,8 +12,8 @@ circ.append(cirq.CNOT(*qubits[1:]))
 print(circ)
 print(isinstance(list(circ.all_operations())[0], cirq.GateOperation))
 
-from passes.utils import circuit_to_dag
-from passes.partition import contract_1q_gates_on_dag
+from daqec.utils import circuit_to_dag
+from daqec.partition import contract_1q_gates_on_dag
 
 dag = circuit_to_dag(circ)
 

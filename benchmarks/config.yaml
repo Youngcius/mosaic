@@ -1,0 +1,23 @@
+
+circ_dpaths: 
+  - 3q_gate
+  - alu
+  - bit_adder
+  - comparator
+  - decode
+  - grover
+  - ham
+  # - ising
+  - mcx
+  - modulo
+  - mult
+  # - pf
+  # - qaoa
+  - qft
+  - random
+  - ripple_adder
+  - square
+  - sym
+  # - uccsd
+  # - vqe_uccsd
+  # - urf
