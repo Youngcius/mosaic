@@ -6,10 +6,8 @@ import networkx as nx
 import rustworkx as rx
 import pydot
 import matplotlib.pyplot as plt
-from networkx.drawing.nx_pydot import graphviz_layout
 from typing import Callable, List, Any, Union
 from IPython.display import Image
-from .circuits import repr_circuit
 
 
 def rx_to_nx_graph(graph):
@@ -34,6 +32,9 @@ def nx_to_rx_graph(graph):
 
 
 def draw_circ_dag_mpl(dag: Union[nx.DiGraph, rx.PyDiGraph], fname=None, figsize=None, fix_layout=False):
+    from .circuits import repr_circuit
+    from networkx.drawing.nx_pydot import graphviz_layout
+
     if isinstance(dag, rx.PyDiGraph):
         dag = rx_to_nx_graph(dag)
 
@@ -53,12 +54,14 @@ def draw_circ_dag_mpl(dag: Union[nx.DiGraph, rx.PyDiGraph], fname=None, figsize=
             labels={node: (str(node) if isinstance(node, cirq.GateOperation) else repr_circuit(node)) for node in
                     dag.nodes}, node_color=node_colors,
             edgecolors='k',
-            node_size=450, font_size=8, font_weight='bold')
+            node_size=800, font_size=6, font_weight='bold')
     if fname:
         plt.savefig(fname)
 
 
 def draw_circ_dag_graphviz(dag: Union[nx.DiGraph, rx.PyDiGraph], fname: str = None) -> Image:
+    from .circuits import repr_circuit
+    
     if isinstance(dag, rx.PyDiGraph):
         dag = rx_to_nx_graph(dag)
 
@@ -67,7 +70,7 @@ def draw_circ_dag_graphviz(dag: Union[nx.DiGraph, rx.PyDiGraph], fname: str = No
     colors = {1: 'white', 2: 'lightblue', 3: 'lightgreen', 4: 'lightpink',
               5: 'lightyellow', 6: 'lightgray', 7: 'lightcyan', 8: 'lightcoral'}
     for g in dag.nodes:
-        node = pydot.Node(hash(g), label=str(g),
+        node = pydot.Node(hash(g), label=str(g) if isinstance(g, cirq.GateOperation) else repr_circuit(g),
                           fillcolor=colors[len(g.qubits)] if isinstance(g, cirq.GateOperation) else colors[
                               len(g.all_qubits())],
                           style='filled')
