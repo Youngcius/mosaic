@@ -2,82 +2,47 @@
 Universal graph operation utilities, especially for "rustworkx" backend
 """
 import cirq
-import networkx as nx
 import rustworkx as rx
 import pydot
 import matplotlib.pyplot as plt
-from typing import Callable, List, Any, Union
+from typing import Callable, List, Any
 from IPython.display import Image
 
 
-def rx_to_nx_graph(graph):
-    """Convert a rustworkx PyGraph or PyDiGraph to a networkx graph."""
-    edge_list = [(graph[x[0]], graph[x[1]], x[2]) for x in graph.weighted_edge_list()]
-
-    if isinstance(graph, rx.PyGraph):
-        if graph.multigraph:
-            return nx.MultiGraph(edge_list)
-        else:
-            return nx.Graph(edge_list)
-    else:
-        if graph.multigraph:
-            return nx.MultiDiGraph(edge_list)
-        else:
-            return nx.DiGraph(edge_list)
-
-
-def nx_to_rx_graph(graph):
-    """Convert a networkx graph to a rustworkx PyGraph."""
-    return rx.networkx_converter(graph)
-
-
-def draw_circ_dag_mpl(dag: Union[nx.DiGraph, rx.PyDiGraph], fname=None, figsize=None, fix_layout=False):
+def draw_circ_dag_mpl(dag: rx.PyDiGraph, fname=None, figsize=None):
     from .circuits import repr_circuit
-    from networkx.drawing.nx_pydot import graphviz_layout
-
-    if isinstance(dag, rx.PyDiGraph):
-        dag = rx_to_nx_graph(dag)
+    from rustworkx.visualization import mpl_draw
 
     colors = {1: 'white', 2: 'lightblue', 3: 'lightgreen', 4: 'lightpink',
               5: 'lightyellow', 6: 'lightgray', 7: 'lightcyan', 8: 'lightcoral'}
-    node_colors = [colors[len(g.qubits)] if isinstance(g, cirq.GateOperation) else colors[len(g.all_qubits())] for g in
-                   dag.nodes]
-    if fix_layout:
-        pos = graphviz_layout(dag, prog='dot')
-    else:
-        pos = None
+    node_colors = [colors[cirq.num_qubits(g)] for g in dag.nodes()]
 
     if figsize:
         plt.figure(figsize=figsize)
 
-    nx.draw(dag, pos, with_labels=True,
-            labels={node: (str(node) if isinstance(node, cirq.GateOperation) else repr_circuit(node)) for node in
-                    dag.nodes}, node_color=node_colors,
-            edgecolors='k',
-            node_size=800, font_size=6, font_weight='bold')
+    mpl_draw(dag, with_labels=True,
+            labels=str if isinstance(next(iter(dag.nodes())), cirq.GateOperation) else repr_circuit, 
+            node_color=node_colors,
+            edgecolors='grey',
+            node_size=450, font_size=6, font_weight='bold')
     if fname:
         plt.savefig(fname)
 
 
-def draw_circ_dag_graphviz(dag: Union[nx.DiGraph, rx.PyDiGraph], fname: str = None) -> Image:
+def draw_circ_dag_graphviz(dag: rx.PyDiGraph, fname: str = None) -> Image:
     from .circuits import repr_circuit
-    
-    if isinstance(dag, rx.PyDiGraph):
-        dag = rx_to_nx_graph(dag)
 
     dot = pydot.Dot(graph_type='digraph')
     gate_to_node = {}
     colors = {1: 'white', 2: 'lightblue', 3: 'lightgreen', 4: 'lightpink',
               5: 'lightyellow', 6: 'lightgray', 7: 'lightcyan', 8: 'lightcoral'}
-    for g in dag.nodes:
-        node = pydot.Node(hash(g), label=str(g) if isinstance(g, cirq.GateOperation) else repr_circuit(g),
-                          fillcolor=colors[len(g.qubits)] if isinstance(g, cirq.GateOperation) else colors[
-                              len(g.all_qubits())],
-                          style='filled')
-        gate_to_node[g] = node
+    for idx in dag.node_indices():
+        node = pydot.Node(idx, label=str(dag[idx]) if isinstance(dag[idx], cirq.GateOperation) else repr_circuit(dag[idx]),
+                          fillcolor=colors[cirq.num_qubits(dag[idx])], style='filled')
+        gate_to_node[idx] = node
         dot.add_node(node)
-    for edge in dag.edges:
-        dot.add_edge(pydot.Edge(gate_to_node[edge[0]], gate_to_node[edge[1]]))
+    for src, dst in dag.edge_list():
+        dot.add_edge(pydot.Edge(gate_to_node[src], gate_to_node[dst]))
     dot.set_rankdir('LR')
     if fname:
         dot.write_png(fname)
@@ -134,4 +99,4 @@ def filter_nodes(dag: rx.PyDiGraph, predicate: Callable) -> List[Any]:
 
 def node_index(graph: rx.PyDiGraph, node: Any) -> int:
     """Return the index of the node in the graph."""
-    return next(idx for idx in graph.node_indices() if graph[idx] == node)
+    return next(idx for idx in graph.node_indices() if id(graph[idx]) == id(node))
