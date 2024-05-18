@@ -1,7 +1,8 @@
+import sys
+
+sys.path.append('..')
 
 import daqec
-import cirq
-import numpy as np
 
 from cirq.contrib.qasm_import import circuit_from_qasm
 
