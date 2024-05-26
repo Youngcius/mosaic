@@ -65,7 +65,6 @@ Returns the unique Choi matrix corresponding to a Kraus representation of a chan
 
 Quantum channel E: L(H1) -> L(H2) may be described by a collection of operators A_i, called
 Kraus operators, such that
-
 $$
 E(\rho) = \sum_i A_i \rho A_i^\dagger.
 $$
