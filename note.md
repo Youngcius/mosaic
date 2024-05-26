@@ -1,23 +1,23 @@
 
 
-#### `represent_operations_in_circuit_with_local_depolarizing_noise`
+#### `represent_operation_with_local_depolarizing_noise`
 
-As described in [Temme_2017_PRL], this function maps an `ideal_operation` $\mathcal{U}$ into its quasi-probability representation, which is a linear combination of noisy implementable operations $\sum_{\alpha} \eta_{\alpha} \mathcal{O}_{\alpha}$.
+As described in :cite:`Temme_2017_PRL`, this function maps an ``ideal_operation`` $\mathcal{U}$ into its quasi-probability representation, which is a linear combination of noisy implementable operations $\sum_\alpha \eta_{\alpha} \mathcal{O}_{\alpha}$.
 
-This function assumes a (local) single-qubit depolarizing noise model even for multi-qubit operations. More precisely, it assumes that the following noisy operations are implementable $\mathcal{O}_{\alpha} = \mathcal{D}^{\otimes k} \circ \mathcal{P}_{\alpha} \circ \mathcal{U}$, where $\mathcal{U}$ is the unitary associated to the input `ideal_operation` acting on $k$ qubits, $\mathcal{P}_{\alpha}$ is a Pauli operation and $\mathcal{D}(\rho) = (1 - \epsilon) \rho + \epsilon I/2$ is a single-qubit depolarizing channel ($\epsilon$ is a simple function of `noise_level`).
+This function assumes a (local) single-qubit depolarizing noise model even for multi-qubit operations. More precisely, it assumes that the following noisy operations are implementable: $\mathcal{O}_{\alpha} = \mathcal{D}^{\otimes k} \circ \mathcal{P}_\alpha \circ \mathcal{U}$, where $\mathcal{U}$ is the unitary associated with the input ``ideal_operation`` acting on $k$ qubits, $\mathcal{P}_\alpha$ is a Pauli operation, and $\mathcal{D}(\rho) = (1 - \epsilon) \rho + \epsilon I/2$ is a single-qubit depolarizing channel ($\epsilon$ is a simple function of ``noise_level``).
 
-More information about the quasi-probability representation for a depolarizing noise channel can be found in: `represent_operation_with_global_depolarizing_noise`.
+More information about the quasi-probability representation for a depolarizing noise channel can be found in: :func:`represent_operation_with_global_depolarizing_noise`.
 
-**Args:**
-- ideal_operation: The ideal operation (as a QPROGRAM) to represent.
-- noise_level: The noise level of each depolarizing channel.
-- is_qubit_dependent: If True, the representation corresponds to the operation on the specific qubits defined in `ideal_operation`. If False, the representation is valid for the same gate even if acting on different qubits from those specified in `ideal_operation`.
+### Args:
+- `ideal_operation`: The ideal operation (as a QPROGRAM) to represent.
+- `noise_level`: The noise level of each depolarizing channel.
+- `is_qubit_dependent`: If True, the representation corresponds to the operation on the specific qubits defined in `ideal_operation`. If False, the representation is valid for the same gate even if acting on different qubits from those specified in `ideal_operation`.
 
-**Returns:**
-The quasi-probability representation of the `ideal_operation`.
+### Returns:
+The quasi-probability representation of the ``ideal_operation``.
 
-**Note:**
-The input `ideal_operation` is typically a QPROGRAM with a single gate but could also correspond to a sequence of more gates. This is possible as long as the unitary associated to the input QPROGRAM, followed by a single final depolarizing channel, is physically implementable.
+> **Note:**
+> The input ``ideal_operation`` is typically a QPROGRAM with a single gate but could also correspond to a sequence of more gates. This is possible as long as the unitary associated with the input QPROGRAM, followed by a single final depolarizing channel, is physically implementable.
 
 
 
