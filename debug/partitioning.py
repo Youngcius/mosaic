@@ -2,7 +2,7 @@ import sys
 
 sys.path.append('..')
 
-import daqec
+import mosaic
 
 from cirq.contrib.qasm_import import circuit_from_qasm
 
@@ -17,7 +17,7 @@ circ = circ[:10]
 print(circ)
 
 
-blocks = daqec.partition.seq_partition(circ, 3)
+blocks = mosaic.partition.seq_partition(circ, 3)
 
 for blk in blocks:
     print()
