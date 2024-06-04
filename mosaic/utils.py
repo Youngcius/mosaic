@@ -19,3 +19,7 @@ def spectral_distance(u: np.ndarray, v: np.ndarray) -> float:
     if u.shape != v.shape:
         raise ValueError('u and v must have the same shape.')
     return np.linalg.norm(u - v, ord=2)
+
+
+def inv_depolarizing_channel_rate(epsilon, n=1):
+    return (4**n-1) * epsilon / (4**n-1 - 4**n * epsilon)
