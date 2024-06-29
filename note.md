@@ -108,28 +108,6 @@ return np.einsum('bi,bj->ij', k, k.conj())
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### Modification on libraries
 
 - Add `__hash__` method to `cirq.Circuit` class, and remove its `__hash__ = None` field
